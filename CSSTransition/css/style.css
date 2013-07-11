@@ -10,10 +10,10 @@
 }
 
 #ball {
-	width: 140px;
-	height: 140px;
-	border-radius: 70px;
-	background: rgb(187,187,187);
+    width: 140px;
+    height: 140px;
+    border-radius: 70px;
+    background: rgb(187,187,187);
     background-image: -webkit-linear-gradient(left, #8F2B71 50%, #707176 0%);
 }
 
