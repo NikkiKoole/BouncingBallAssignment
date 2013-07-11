@@ -24,3 +24,11 @@
     top: 540px;
     background: #8F2B71;
 }
+
+label, input {
+    font-size:1.5em;
+    font-family: Corbel, "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", "Bitstream Vera Sans", "Liberation Sans", Verdana, "Verdana Ref", sans-serif;
+}
+
+
+
