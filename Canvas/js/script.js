@@ -2,7 +2,12 @@ window.onload = function () {
     "use strict";
     var context,
         canvas = document.getElementsByTagName('canvas')[0],//jslint needed definition
-        balls = [];
+        balls = [],
+        massInput = document.getElementById('mass'),
+        frictionInput = document.getElementById('friction'),
+        gravityInput = document.getElementById('gravity');
+
+    canvas.onselectstart = function () { return false; };
 
     function ballCollisionResolver(ball1, ball2) {
         var dx = ball1.nextX - ball2.nextX,
@@ -52,10 +57,11 @@ window.onload = function () {
     function testWallColliding() {
         var i,
             ball;
+            
 
         for (i = 0; i < balls.length; i += 1) {
             ball = balls[i];
-
+            
             if (ball.nextX + ball.radius > canvas.width) { // right wall
                 ball.vx = ball.vx * -(1 - ball.friction);
                 ball.nextX = canvas.width - ball.radius;
@@ -64,6 +70,7 @@ window.onload = function () {
                 ball.nextX = ball.radius;
             } else if (ball.nextY + ball.radius > canvas.height) { // bottom wall
                 ball.vy = ball.vy * -(1 - ball.friction);
+                ball.vy *= (1.0 - (ball.mass / 900)); // more mass => less bounce
                 ball.nextY = canvas.height - ball.radius;
             } else if (ball.nextY - ball.radius < 0) { // left wall
                 ball.vy = ball.vy * -(1 - ball.friction);
@@ -78,29 +85,34 @@ window.onload = function () {
 
         for (i = 0; i < balls.length; i += 1) {
             ball = balls[i];
-            ball.vy += 0.2;
+            ball.vy += (1.0 / (20.0 / gravityInput.value)); //magic numbers
             ball.nextX = (ball.x + ball.vx);
             ball.nextY = (ball.y + ball.vy);
-            ball.angle += ((ball.vx + ball.vy) * 0.0174);
+            ball.angle += ((ball.vx + ball.vy) * 0.0174);  //toRadians
         }
     }
 
     function handleGroundFriction() {
         var i,
-            ball;
+            ball,
+            ballMovement;
 
         for (i = 0; i < balls.length; i += 1) {
+            
             ball = balls[i];
             if (ball.nextY + ball.radius + 1 > canvas.height) {
-                ball.vx *= (1 - ball.friction);
-                if ((Math.abs(ball.vy) + Math.abs(ball.vx)) < 0.09) {
+                
+                ball.vx *= (1.0 - ball.friction);
+                ballMovement = (Math.abs(ball.vy) + Math.abs(ball.vx));
+                if (ballMovement < .5) {
                     balls.splice(i, 1);
                 }
+                
             }
         }
     }
 
-    function ballsCollide(ball1, ball2) {
+    function ballsOverlap(ball1, ball2) {
         var dx = ball1.nextX - ball2.nextX,
             dy = ball1.nextY - ball2.nextY,
             distance = (dx * dx + dy * dy);
@@ -123,7 +135,7 @@ window.onload = function () {
             ball = balls[i];
             for (j = i + 1; j < balls.length; j += 1) {
                 other = balls[j];
-                if (ballsCollide(ball, other)) {
+                if (ballsOverlap(ball, other)) {
                     ballCollisionResolver(ball, other);
                 }
             }
@@ -142,7 +154,7 @@ window.onload = function () {
             ball;
 
         context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-        context.fillStyle = "grey";
+        context.fillStyle = "lightgrey";
         context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
         for (i = 0; i < balls.length; i += 1) {
@@ -152,13 +164,13 @@ window.onload = function () {
             ball.x = ball.nextX;
             ball.y = ball.nextY;
             context.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI, false);
-            context.fillStyle = ball.color;
+            context.fillStyle = ball.color1;
             context.fill();
             context.closePath();
 
             context.beginPath();
             context.arc(ball.x, ball.y, ball.radius, ball.angle, ball.angle +  Math.PI, false);
-            context.fillStyle = '#ff0000';
+            context.fillStyle = ball.color2;
             context.fill();
             context.closePath();
         }
@@ -170,18 +182,24 @@ window.onload = function () {
     }
 
 
-    function Ball(x, y, vx, vy, color, radius) {
+    function Ball(x, y, vx, vy, color1, color2, radius, mass, friction) {
         this.x = x;
         this.y = y;
         this.vx = vx;
         this.vy = vy;
         this.nextX = x;
         this.nextY = y;
-        this.color = color;
+        this.color1 = color1;
+        this.color2 = color2;
         this.radius = radius;
-        this.friction = 0.3;
+        this.friction = friction;
         this.angle = Math.random() * (Math.PI * 2);
-        this.mass = this.radius;
+        this.mass = mass * radius;
+    }
+    
+    function getRndColor() {
+        var colors = ['#9E176A', '#D63175', '#D9236D', '#6A0E47', '#82848C', '#666071'];
+        return colors[Math.floor(Math.random() * colors.length)];
     }
 
     function addBallAt(x, y) {
@@ -189,15 +207,15 @@ window.onload = function () {
         var i,
             ball,
             overlapping = false,
-            testBall = new Ball(x, y, 0, 0, '#FF00FF', Math.random() * 10 + 10);
-
+            mass = massInput.value,
+            testBall = new Ball(x, y, 0, 0, getRndColor(), getRndColor(), Math.random() * 20 + 10, mass, frictionInput.value);
+ 
         for (i = 0; i < balls.length; i += 1) {
             ball = balls[i];
 
-            if (ballsCollide(ball, testBall)) {
+            if (ballsOverlap(ball, testBall)) {
                 overlapping = true;
             }
-
         }
 
         if (overlapping === false) {
@@ -215,6 +233,9 @@ window.onload = function () {
         }
 
         addBallAt(x, y);
+
+        e.preventDefault();
+        return false;
     }
 
 
@@ -228,6 +249,7 @@ window.onload = function () {
 
     init();
     addBallAt(10, 10);
+    addBallAt(110, 10);
+    addBallAt(210, 10);
 };
-
 

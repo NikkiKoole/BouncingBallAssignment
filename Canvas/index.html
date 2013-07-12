@@ -7,8 +7,14 @@
 </head>
 
 <body>
-<canvas id="canvas" width="500" height="400">
-  </canvas> 
+    <canvas id="canvas" width="500" height="400"></canvas></br>
+    Click on the canvas to add a ball.</br>    
+    <label for="gravity">Gravity (for all balls): </label>        
+    <input type="range" min="1" max="20" value="9.8" step="0.1" id="gravity" ></br>    
+    <label for="mass">Mass (of next ball): </label>        
+    <input type="range" min="5" max="30" value="20" step="1" id="mass" ></br>        
+    <label for="friction">Friction (of next ball): </label>          
+    <input type="range" min="0.02" max="0.5" value="0.3" step="0.01" id="friction" ></br> 
 </body>
 
 </html>
