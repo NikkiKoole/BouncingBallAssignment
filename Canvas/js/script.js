@@ -5,15 +5,26 @@ window.onload = function () {
         balls = [];
 
     function ballsCollide(ball1, ball2) {
-        // this function will be called balls.length^2 per frame
-        // i will test if balls are colliding, if so 
-        // i will reposition balls so the are not colliding/overlapping
-        // and bounce their v's.    
+
+        var xd = ball1.x - ball2.x;
+        var yd = ball1.y - ball2.y;
+
+        var sumRadii = ball1.radius + ball2.radius;
+        var sqrRadii = sumRadii * sumRadii;
+        
+        var distSqr = (xd * xd) + (yd * yd);
+        
+        if (distSqr <= sqrRadii) {
+            return true;        
+        }
+        
+        return false;
     } 
 
     function update() {
 
         var i,
+            j,
             ball,
             ballMovement;
 
@@ -57,14 +68,28 @@ window.onload = function () {
                 ball.vx *= -(1 - ball.friction);
             }
             
+            ball.angle += (ball.vx * 0.0174 * 3); //visually atractive rotation of ball.
             
+
             ballMovement = Math.abs(ball.vy) + Math.abs(ball.vx);
             
             //ball kill (when on ground and *not* moving)
-            if ( (ballMovement < 0.02) && (ball.y + 1 > canvas.height - ball.radius ))  {
+            if ( (ballMovement < 0.06) && (ball.y + 2 > canvas.height - ball.radius ))  {
                 console.log(ball.y);
                 balls.splice(i, 1);            
             }
+            
+            // now test this ball against all other balls to see if it is colliding;
+            // if so mirror its vx and vy
+            for (j = 0; j < balls.length; j += 1) {
+                if (j != i) {
+                    if (ballsCollide(balls[i], balls[j])) {
+                        balls[i].vx *= -1;
+                        balls[i].vy *= -1;                   
+                    }                
+                }            
+            }
+            
         }
     }
 
@@ -79,10 +104,18 @@ window.onload = function () {
 
         for (i = 0; i < balls.length; i += 1) {
             ball = balls[i];
+
             context.beginPath();
-            context.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI, false);
+            context.arc(ball.x, ball.y, ball.radius, 0, 2* Math.PI, false);
             context.fillStyle = ball.color;
             context.fill();
+            context.closePath();
+
+            context.beginPath();
+            context.arc(ball.x, ball.y, ball.radius, ball.angle, ball.angle +  Math.PI, false);
+            context.fillStyle = '#ff0000';
+            context.fill();
+            context.closePath();
         }
     }
 
@@ -92,26 +125,27 @@ window.onload = function () {
     }
 
 
-    function Ball(x, y, vx, vy, color, radius) {
+    function Ball(x, y, vx, vy, color) {
         this.x = x;
         this.y = y;
         this.vx = vx;
         this.vy = vy;
         this.color = color;
-        this.radius = radius;
+        this.radius = Math.random() * 20 + 10;
         this.friction = 0.3;
+        this.angle = Math.random() * (Math.PI * 2);
     }
 
     function addBalls() {
-        balls.push(new Ball(100, 20, -2, -0.01, '#FF00FF', 20));
-        balls.push(new Ball(200, 20, 2, -0.01, '#FF00FF', 20));
-        balls.push(new Ball(300, 20, 0, -0.01, '#FF00FF', 20));
+        balls.push(new Ball(100, 20, -2, -0.01, '#FF00FF'));
+        balls.push(new Ball(200, 20, 2, -0.01, '#FF00FF'));
+        balls.push(new Ball(300, 20, 0, -0.01, '#FF00FF'));
     }
 
     function addBallAt(x, y) {
         // will need a way to *NOT* overlap balls by clicking at same spot repeatedly.
         // it gives a nice line, but it is to much trouble when balls can collide with each other.
-        balls.push(new Ball(x, y, 2, 2, '#FF00FF', 20));
+        balls.push(new Ball(x, y, 2, 2, '#FF00FF'));
     }
 
     function init() {
