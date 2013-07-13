@@ -78,6 +78,10 @@ window.onload = function () {
             }
         }
     }
+    
+    function destroyBall(ballIndex) {
+        balls.splice(ballIndex, 1);
+    }
 
     function updateBallPositions() {
         var i,
@@ -85,10 +89,20 @@ window.onload = function () {
 
         for (i = 0; i < balls.length; i += 1) {
             ball = balls[i];
-            ball.vy += (1.0 / (20.0 / gravityInput.value)); //magic numbers
+            if (!(ball.nextY + ball.radius > canvas.height)) {
+                ball.vy += (1.0 / (20.0 / gravityInput.value)); //magic numbers
+            }
             ball.nextX = (ball.x + ball.vx);
             ball.nextY = (ball.y + ball.vy);
             ball.angle += ((ball.vx + ball.vy) * 0.0174);  //toRadians
+            
+            if (ball.dying) {
+  
+                if (ball.animCounter <= 0) {
+                    destroyBall(i);                    
+                }
+                ball.animCounter -= 10;            
+            }
         }
     }
 
@@ -104,8 +118,10 @@ window.onload = function () {
                 
                 ball.vx *= (1.0 - ball.friction);
                 ballMovement = (Math.abs(ball.vy) + Math.abs(ball.vx));
-                if (ballMovement < .5) {
-                    balls.splice(i, 1);
+                //console.log("ballmovement "+ballMovement);
+                if (ballMovement < 0.4) {
+                    //
+                    ball.dying = true;
                 }
                 
             }
@@ -125,7 +141,7 @@ window.onload = function () {
 
 
 
-    function ballIsColliding() {
+    function ballBallCollisionTest() {
         var ball,
             other,
             i,
@@ -146,23 +162,30 @@ window.onload = function () {
         updateBallPositions();
         testWallColliding();
         handleGroundFriction();
-        ballIsColliding();
+        ballBallCollisionTest();
     }
 
     function draw() {
         var i,
             ball;
-
+        context.globalAlpha = 1.0; 
         context.clearRect(0, 0, context.canvas.width, context.canvas.height);
         context.fillStyle = "lightgrey";
         context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
         for (i = 0; i < balls.length; i += 1) {
+            
             ball = balls[i];
-
+            
             context.beginPath();
             ball.x = ball.nextX;
             ball.y = ball.nextY;
+            if (ball.dying) { 
+                context.globalAlpha = (ball.animCounter/100);
+            } else {
+               context.globalAlpha = 1.0;             
+            }
+            
             context.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI, false);
             context.fillStyle = ball.color1;
             context.fill();
@@ -195,6 +218,8 @@ window.onload = function () {
         this.friction = friction;
         this.angle = Math.random() * (Math.PI * 2);
         this.mass = mass * radius;
+        this.dying = false;
+        this.animCounter = 100;
     }
     
     function getRndColor() {
