@@ -18,7 +18,7 @@ How to see the solutions ?
 1. <code>download the repository as a zip (and unpack) or via git</code>
 2. <code>run menu.html in Chrome</code>
 3. <code>use the menu to navigate the solutions</code>
-- - -
+
 
 How to rebuild/edit the solutions ?
 -----------------------------------
