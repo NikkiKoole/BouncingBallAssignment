@@ -1,0 +1,33 @@
+#content {
+    width: 400px;
+    margin: 0 auto;
+}
+
+button {
+    position: relative;
+    margin-bottom: 1em;
+    width: 400px;
+    height: 150px;
+}
+
+h1, h2 {
+    position: absolute;
+    top: 0px;
+    
+}
+
+h1 {
+    font-size: 3em;
+    left: 0px;
+    top: -0.5em;
+}
+
+h2 {
+    left: 3em;
+}
+
+p {
+    text-align: left;
+    left: 3em;
+}
+
