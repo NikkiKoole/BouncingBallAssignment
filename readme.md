@@ -26,7 +26,9 @@ How to rebuild/edit the solutions ?
 2. for the first 2 solutions (CSSTransition and Canvas2D) you can just edit the files as you wish, and check the results in your browser.  The last solution is more complex because LimeJS has a compiler and relies on a few extra libraries that are not in this repo:
    1. download  [LimeJS](https://github.com/digitalfruit/limejs "Title")
    2. move the balls folder into the newly created lime folder. 
-   3. follow the build steps as described [here](http://www.limejs.com/7-building "Title") to create a newly compiled JS file from the edited original. 
+   3. uncomment the lines in balls.html when working locally; so you use closure and limejs libs.
+   4. follow the build steps as described [here](http://www.limejs.com/7-building "Title") to create a newly compiled JS file from the edited original.
+   
 
 Author & License
 ------
