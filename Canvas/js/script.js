@@ -1,7 +1,15 @@
 window.onload = function () {
+    // This program simulates a collection of bouncing balls.
+    // It will work with these variables:
+    // -Mass (the larger the mass, the less bouncing distance)
+    // -Gravity (the larger the gravity, the higher the speed of movement)
+    // -Friction (the larger the friction, the less bouncing distance (visually the same as Mass))
+    // balls can bounce against each other using conservation of momentum laws. 
+    // the Mass of balls will alos be notable when they collide into each other.   
+    
     "use strict";
     var context,
-        canvas = document.getElementsByTagName('canvas')[0],//jslint needed definition
+        canvas = document.getElementsByTagName('canvas')[0],
         balls = [],
         massInput = document.getElementById('mass'),
         frictionInput = document.getElementById('friction'),
@@ -56,12 +64,12 @@ window.onload = function () {
 
     function testWallColliding() {
         var i,
-            ball;
-            
+            ball,
+            maxMass = 900;
 
         for (i = 0; i < balls.length; i += 1) {
             ball = balls[i];
-            
+
             if (ball.nextX + ball.radius > canvas.width) { // right wall
                 ball.vx = ball.vx * -(1 - ball.friction);
                 ball.nextX = canvas.width - ball.radius;
@@ -70,7 +78,7 @@ window.onload = function () {
                 ball.nextX = ball.radius;
             } else if (ball.nextY + ball.radius > canvas.height) { // bottom wall
                 ball.vy = ball.vy * -(1 - ball.friction);
-                ball.vy *= (1.0 - (ball.mass / 900)); // more mass => less bounce
+                ball.vy *= (1.0 - (ball.mass / maxMass)); // more mass => less bounce
                 ball.nextY = canvas.height - ball.radius;
             } else if (ball.nextY - ball.radius < 0) { // left wall
                 ball.vy = ball.vy * -(1 - ball.friction);
@@ -78,30 +86,32 @@ window.onload = function () {
             }
         }
     }
-    
+
     function destroyBall(ballIndex) {
         balls.splice(ballIndex, 1);
     }
 
     function updateBallPositions() {
         var i,
-            ball;
+            ball,
+            toRad = 0.0174;
 
         for (i = 0; i < balls.length; i += 1) {
             ball = balls[i];
             if (!(ball.nextY + ball.radius > canvas.height)) {
-                ball.vy += (1.0 / (20.0 / gravityInput.value)); //magic numbers
+                //vy will be larger when gravity is greater.
+                ball.vy += (1.0 / (20.0 / gravityInput.value));
             }
             ball.nextX = (ball.x + ball.vx);
             ball.nextY = (ball.y + ball.vy);
-            ball.angle += ((ball.vx + ball.vy) * 0.0174);  //toRadians
-            
+            ball.angle += ((ball.vx + ball.vy) * toRad);
+
             if (ball.dying) {
-  
+
                 if (ball.animCounter <= 0) {
-                    destroyBall(i);                    
+                    destroyBall(i);
                 }
-                ball.animCounter -= 10;            
+                ball.animCounter -= 10;
             }
         }
     }
@@ -109,21 +119,20 @@ window.onload = function () {
     function handleGroundFriction() {
         var i,
             ball,
-            ballMovement;
+            ballMovement,
+            deathSpeed = 0.4;
 
         for (i = 0; i < balls.length; i += 1) {
-            
+
             ball = balls[i];
             if (ball.nextY + ball.radius + 1 > canvas.height) {
-                
+
                 ball.vx *= (1.0 - ball.friction);
                 ballMovement = (Math.abs(ball.vy) + Math.abs(ball.vx));
-                //console.log("ballmovement "+ballMovement);
-                if (ballMovement < 0.4) {
-                    //
+                if (ballMovement < deathSpeed) {
                     ball.dying = true;
                 }
-                
+
             }
         }
     }
@@ -168,24 +177,24 @@ window.onload = function () {
     function draw() {
         var i,
             ball;
-        context.globalAlpha = 1.0; 
+        context.globalAlpha = 1.0;
         context.clearRect(0, 0, context.canvas.width, context.canvas.height);
         context.fillStyle = "lightgrey";
         context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
         for (i = 0; i < balls.length; i += 1) {
-            
+
             ball = balls[i];
-            
             context.beginPath();
             ball.x = ball.nextX;
             ball.y = ball.nextY;
-            if (ball.dying) { 
-                context.globalAlpha = (ball.animCounter/100);
+
+            if (ball.dying) {
+                context.globalAlpha = (ball.animCounter / 100); //alpha will be the percentage life left.
             } else {
-               context.globalAlpha = 1.0;             
+                context.globalAlpha = 1.0;
             }
-            
+
             context.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI, false);
             context.fillStyle = ball.color1;
             context.fill();
@@ -221,7 +230,7 @@ window.onload = function () {
         this.dying = false;
         this.animCounter = 100;
     }
-    
+
     function getRndColor() {
         var colors = ['#9E176A', '#D63175', '#D9236D', '#6A0E47', '#82848C', '#666071'];
         return colors[Math.floor(Math.random() * colors.length)];
@@ -234,7 +243,7 @@ window.onload = function () {
             overlapping = false,
             mass = massInput.value,
             testBall = new Ball(x, y, 0, 0, getRndColor(), getRndColor(), Math.random() * 20 + 10, mass, frictionInput.value);
- 
+
         for (i = 0; i < balls.length; i += 1) {
             ball = balls[i];
 
@@ -265,10 +274,11 @@ window.onload = function () {
 
 
     function init() {
-        var canvasElement = document.getElementById("canvas");
+        var FPS = 30,
+            canvasElement = document.getElementById("canvas");
         context = canvasElement.getContext("2d");
         canvas.addEventListener('click', canvasOnClick, false);
-        setInterval(mainLoop, 1000 / 30);
+        setInterval(mainLoop, 1000 / FPS);
     }
 
 
